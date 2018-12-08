@@ -20,7 +20,7 @@ class FetchGOES(object):
     }
 
     def __init__(self, year=None, doy=None, hour=None, minute=None,
-                 satellite='goes16'):
+                 satellite='goes16', frame='F'):
         self.year = year
         self.doy = doy
         self.hour = hour
@@ -29,9 +29,37 @@ class FetchGOES(object):
             self.date = True
 
         self.satellite = satellite
+        self.frame = frame
+
+    def parse_arguments(self):
+        self.parser = argparse.ArgumentParser(description='Output time of last GOES frame')
+        # TODO limit to F, C, M
+        self.parser.add_argument('frame', choices=['F', 'C', 'M',],
+            help='Type of frame to fetch: F, C, M')
+
+        self.parser.add_argument('-o', '--output', dest='out',
+            help="Output file destination (default: based on date")
+        self.parser.add_argument('-k', '--keep', dest='keep',
+            action='store_true', help="Keep intermediate files")
+        self.parser.add_argument('-s', '--satellite', dest='satellite',
+            default="goes16", choices=["goes16", "goes17"],
+            help="Satellite (default: 'goes16')")
+
+        # ? add verbosity flag
+
+        self.parser.add_argument('date', nargs=argparse.REMAINDER,
+            help='Date, in format year day_of_year hour day')
+
+        args = self.parser.parse_args(namespace=self)
+
+        if self.date:
+            try:
+                (self.year, self.doy, self.hour, self.minute) = [int(v) for v in self.date]
+            except ValueError:
+                raise Exception(f"Date not parsed from {self.date}")
+            print("Set date from command line arguments")
 
     def process(self):
-        self.parse_arguments()
         if not self.date:
             self.get_last_frame_time()
 
@@ -114,34 +142,6 @@ class FetchGOES(object):
 
         print(f"Done - output as {self.out}")
 
-    def parse_arguments(self):
-        self.parser = argparse.ArgumentParser(description='Output time of last GOES frame')
-        # TODO limit to F, C, M
-        self.parser.add_argument('frame', choices=['F', 'C', 'M',],
-            help='Type of frame to fetch: F, C, M')
-
-        self.parser.add_argument('-o', '--output', dest='out',
-            help="Output file destination (default: based on date")
-        self.parser.add_argument('-k', '--keep', dest='keep',
-            action='store_true', help="Keep intermediate files")
-        self.parser.add_argument('-s', '--satellite', dest='satellite',
-            default="goes16", choices=["goes16", "goes17"],
-            help="Satellite (default: 'goes16')")
-
-        # ? add verbosity flag
-
-        self.parser.add_argument('date', nargs=argparse.REMAINDER,
-            help='Date, in format year day_of_year hour day')
-
-        args = self.parser.parse_args(namespace=self)
-
-        if self.date:
-            try:
-                (self.year, self.doy, self.hour, self.minute) = [int(v) for v in self.date]
-            except ValueError:
-                raise Exception(f"Date not parsed from {self.date}")
-            print("Set date from command line arguments")
-
     def file_missing(self, path):
         return (not os.path.exists(path) and not os.path.isfile(path))
 
@@ -206,5 +206,7 @@ class FetchGOES(object):
 
 
 if __name__ == '__main__':
-    FetchGOES().process()
+    g = FetchGOES()
+    g.parse_arguments()
+    g.process()
 
