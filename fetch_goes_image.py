@@ -19,17 +19,16 @@ class FetchGOES(object):
         3: 'nir',
     }
 
-    def __init__(self, year=None, doy=None, hour=None, minute=None,
-                 satellite='goes16', frame='F'):
-        self.year = year
-        self.doy = doy
-        self.hour = hour
-        self.minute = minute
-        if year and doy and hour and minute:
-            self.date = True
+    def __init__(self, dt, satellite='goes16', frame='F'):
+        self.date = True
+        self.year = dt.year
+        self.doy = dt.timetuple().tm_yday
+        self.hour = dt.hour
+        self.minute = dt.minute
 
         self.satellite = satellite
         self.frame = frame
+        self.out = None
 
     def parse_arguments(self):
         self.parser = argparse.ArgumentParser(description='Output time of last GOES frame')
