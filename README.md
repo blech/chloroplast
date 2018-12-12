@@ -11,7 +11,7 @@ Dependencies include but are not necessarily limited to:
 - `rasterio` and `rio-mucho` (ditto `rio` ditto)
 - `netCDF4`
 - `ImageMagick` as a system utility (soon to be replacaed by `rio-color`)
-- `jq` as a system utility.
+- ~~`jq` as a system utility.~~
 - GNU `parallel` (_not_ the one in `moreutils`) as a system utility
 - `gdal` (package may be called `gdal-bin`) as a system utility
 
