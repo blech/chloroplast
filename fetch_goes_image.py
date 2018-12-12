@@ -19,12 +19,15 @@ class FetchGOES(object):
         3: 'nir',
     }
 
-    def __init__(self, dt, satellite='goes16', frame='F'):
-        self.date = True
-        self.year = dt.year
-        self.doy = dt.timetuple().tm_yday
-        self.hour = dt.hour
-        self.minute = dt.minute
+    def __init__(self, dt=None, satellite='goes16', frame='F'):
+        if dt:
+            self.date = True
+            self.year = dt.year
+            self.doy = dt.timetuple().tm_yday
+            self.hour = dt.hour
+            self.minute = dt.minute
+        else:
+            self.date = False
 
         self.satellite = satellite
         self.frame = frame
@@ -59,6 +62,15 @@ class FetchGOES(object):
             print("Set date from command line arguments")
 
     def process(self):
+        # This is the bulk of the code: it calls out to either other
+        # Python files (nctogtiff, weight) or installed programs (gdalwarp,
+        # rio stack, convert/rio color) to fetch, convert, and stack raw
+        # GOES imagery into an RGB tiff
+
+        # It's possible this needs to be extended to generate (smaller) JPGs
+        # or split up to make the different sections (fetch bands, convert
+        # bands, combine bands) into distinct chunks
+
         if not self.date:
             self.get_last_frame_time()
 
